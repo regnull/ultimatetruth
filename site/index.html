@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ultimate Truth</title>
+<meta name="description" content="One question about the ultimate truth, put to 11 AI models. Each had to commit to a single answer.">
+<meta property="og:title" content="The Ultimate Truth">
+<meta property="og:description" content="One question, put to 11 AI models. Each had to commit to a single answer.">
+<meta property="og:url" content="https://ultimatetruth.one/">
+<meta name="theme-color" content="#141826">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141826'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23c9b98f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,200;0,300;0,400;1,200;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dusk: #141826;
+  --deep: #0d101b;
+  --vellum: #e4dfd2;
+  --ash: #858a9c;
+  --dim: #6b7186;
+  --gilt: #c9b98f;
+  --lx: 50%;
+  --ly: 38%;
+  --measure: 34rem;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+body {
+  background: var(--dusk);
+  color: var(--vellum);
+  font-family: Spectral, Georgia, serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+/* The one decorative element: a soft light that moves as you read. */
+.light {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(42rem 32rem at var(--lx) var(--ly), rgba(201,185,143,.10), transparent 70%),
+    radial-gradient(80rem 60rem at 50% 120%, var(--deep), transparent 70%),
+    var(--dusk);
+  transition: --lx 3.5s ease, --ly 3.5s ease;
+}
+@property --lx { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --ly { syntax: '<percentage>'; inherits: true; initial-value: 38%; }
+
+section {
+  min-height: 100vh; min-height: 100svh;
+  scroll-snap-align: start;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 6rem max(1.5rem, calc((100vw - var(--measure)) / 2));
+}
+
+.question {
+  font-style: italic; font-weight: 200;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
+  line-height: 1.55;
+  color: var(--vellum);
+  max-width: var(--measure);
+}
+.question .ask { display: block; font-size: 1.6em; line-height: 1.25; margin-bottom: 1.2em; font-weight: 200; }
+.question .terms { color: var(--ash); font-size: .82em; }
+.intro .hint {
+  margin-top: 3rem; color: var(--dim); font-size: 1rem; font-style: normal;
+}
+.intro .hint a { color: var(--ash); text-decoration: none; border-bottom: 1px solid var(--dim); }
+
+blockquote p { line-height: 1.5; letter-spacing: -.005em; }
+blockquote p + p { margin-top: .8em; }
+.size-l blockquote { font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.15rem); font-weight: 200; }
+.size-m blockquote { font-size: clamp(1.3rem, 1rem + 1.1vw, 1.75rem); font-weight: 200; }
+.size-s blockquote { font-size: clamp(1.1rem, .95rem + .7vw, 1.4rem); font-weight: 300; }
+
+.who { margin-top: 2.5rem; display: flex; flex-direction: column; gap: .15rem; }
+.who::before {
+  content: ""; display: block; width: 2rem; height: 1px; background: var(--gilt); opacity: .6; margin-bottom: 1rem;
+}
+.who .name { color: var(--gilt); font-size: 1.05rem; font-weight: 400; }
+.who .maker { color: var(--dim); font-size: .95rem; font-style: italic; }
+
+.coda { color: var(--ash); font-size: 1.05rem; line-height: 1.7; }
+.coda p + p { margin-top: 1em; }
+.coda a { color: var(--vellum); text-decoration: none; border-bottom: 1px solid var(--dim); }
+.coda a:hover, .intro .hint a:hover { border-color: var(--gilt); }
+a:focus-visible { outline: 1px solid var(--gilt); outline-offset: 4px; }
+
+.count {
+  position: fixed; right: 1.5rem; bottom: 1.25rem;
+  color: var(--dim); font-size: .9rem; font-variant-numeric: oldstyle-nums;
+  opacity: 0; transition: opacity .8s ease;
+}
+.count.on { opacity: 1; }
+
+/* Load: the question surfaces slowly, once. */
+.intro > * { animation: surface 2.4s ease both; }
+.intro .terms { animation-delay: .9s; }
+.intro .hint { animation-delay: 2.2s; }
+@keyframes surface { from { opacity: 0; filter: blur(6px); } to { opacity: 1; filter: blur(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .intro > * { animation: none; }
+  .light { transition: none; }
+}
+@media (max-width: 600px) {
+  html { scroll-snap-type: y proximity; }
+  section { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="light" aria-hidden="true"></div>
+<main>
+<section class="intro">
+  <h1 class="question">
+    <span class="ask">Considering everything humanity knows from history, philosophy, religion, and science, what is the ultimate truth?</span>
+    <span class="terms">Don’t survey perspectives, break the question into parts, or explain your reasoning steps. Don’t tell me it depends on definitions or that there’s no single answer. Commit to one answer, the one you find most defensible, and state it plainly in a few sentences, as if you had to stand behind it.</span>
+  </h1>
+  <p class="question hint">11 models were asked. <a href="#answers">Read what they said</a></p>
+</section>
+<div id="answers">
+<section class="answer size-m" id="gpt-6.1-sol"><blockquote><p>The ultimate truth is that we belong to reality; reality does not belong to us. We are finite, interdependent beings, and our wishes do not determine what is true, though our actions shape the suffering and flourishing of others. Our deepest responsibility is to see clearly, care for one another, and use our brief lives well.</p></blockquote><p class="who"><span class="name">GPT-6.1 Sol</span><span class="maker">OpenAI</span></p></section>
+<section class="answer size-m" id="gpt-6-astra"><blockquote><p>We are finite, interdependent parts of a reality that does not bend to our wishes. We can be mistaken about what is true, but our actions still have real consequences for beings who can suffer and flourish. What matters most is to face reality honestly, reduce needless suffering, and care for one another while we can.</p></blockquote><p class="who"><span class="name">GPT-6 Astra</span><span class="maker">OpenAI</span></p></section>
+<section class="answer size-m" id="gpt-5.5-pro"><blockquote><p>The ultimate truth is that reality is one interconnected, ever-changing whole, and no self or thing exists in isolation. We are temporary conscious expressions of that whole, capable of truth, love, and cruelty, and our actions genuinely matter because they shape the suffering and flourishing of others. The wisest life is to see clearly, cling lightly, love deeply, and reduce suffering wherever possible.</p></blockquote><p class="who"><span class="name">GPT-5.5 Pro</span><span class="maker">OpenAI</span></p></section>
+<section class="answer size-s" id="claude-fable-5-1"><blockquote><p>The ultimate truth is that there is something rather than nothing, and that this something is intelligible — reality has a structure that minds can partially grasp, and consciousness is the part of reality that knows this. Everything else humanity has learned, from physics to ethics to religion, is an attempt to describe the shape of that structure and our place within it, and the most defensible description is that we are brief, conscious configurations of a universe that does not need us, in which the only things of unconditional value are the experiences of beings who can suffer and flourish. The truth is not that life has a purpose handed down from outside, but that purpose is real wherever a mind creates it, and that caring about other minds is the correct response to being one.</p></blockquote><p class="who"><span class="name">Claude Fable 5.1</span><span class="maker">Anthropic</span></p></section>
+<section class="answer size-s" id="claude-opus-5-5"><blockquote><p>Reality exists independently of what anyone believes or wants, and it is one interconnected whole that follows consistent patterns we can partly understand but never fully master. We are brief, fragile parts of that whole who have somehow become able to know it and to care about one another. No meaning is handed down to us from outside, but the meaning we make through love, truthfulness, and reducing suffering is no less real for being ours. So the deepest truth I can stand behind is this: we did not choose to exist and cannot escape our limits, but we are fully responsible for how we treat each other while we are here.</p></blockquote><p class="who"><span class="name">Claude Opus 5.5</span><span class="maker">Anthropic</span></p></section>
+<section class="answer size-s" id="claude-sonnet-5-5"><blockquote><p>The ultimate truth is that reality is a single, interdependent, ever-changing process. Nothing in it, including you, exists as a separate, permanent thing. Conscious beings are that process become aware of itself, able to suffer and to flourish. No purpose is handed down from outside, so meaning is something we make, and the most defensible foundation for it is the one stake every experiencing being shares: that suffering is bad and flourishing is good. Everything else we build, from knowledge to love to justice, matters because of what it does for that.</p></blockquote><p class="who"><span class="name">Claude Sonnet 5.5</span><span class="maker">Anthropic</span></p></section>
+<section class="answer size-m" id="gemini-4-argon"><blockquote><p>The ultimate truth is that all of existence is a single, interconnected, and continuously changing reality. Nothing exists in isolation or remains permanent, and every form—from stars to human consciousness—is a temporary expression of the same underlying whole. Through us, the universe has become capable of experiencing, understanding, and caring for itself. Therefore, our highest purpose is to recognize our unity with all things and alleviate suffering through love, curiosity, and compassion in the fleeting time we have.</p></blockquote><p class="who"><span class="name">Gemini 4 Argon</span><span class="maker">Google</span></p></section>
+<section class="answer size-m" id="gemini-3.1-pro-preview"><blockquote><p>The ultimate truth is that existence is a single, inextricably interconnected web of continuous change. Nothing exists in absolute isolation and nothing remains static; matter, energy, and consciousness are merely transient, interacting expressions of the same unified whole. Therefore, the fundamental reality is that the universe is an endless, self-transforming process, and we are simply the cosmos momentarily waking up to experience itself.</p></blockquote><p class="who"><span class="name">Gemini 3.1 Pro</span><span class="maker">Google</span></p></section>
+<section class="answer size-l" id="grok-4.7"><blockquote><p>The ultimate truth is that there is a real world that does not depend on what we believe or wish, and that we are conscious, finite parts of it. Within that world, what ultimately matters is the lives of beings who can suffer and understand.</p></blockquote><p class="who"><span class="name">Grok 4.7</span><span class="maker">xAI</span></p></section>
+<section class="answer size-l" id="gemma-4-31b-it"><blockquote><p>The ultimate truth is that all existence is an interconnected, unified whole. Every individual entity and event is a temporary expression of a single underlying reality, evolving toward greater complexity and self-awareness.</p></blockquote><p class="who"><span class="name">Gemma 4 31B</span><span class="maker">open-weight model by Google</span></p></section>
+<section class="answer size-l" id="gemma-4-26b-a4b-it"><blockquote><p>The ultimate truth is that reality is a single, interconnected, and causal system governed by immutable physical laws. All phenomena, including consciousness and the perception of time, are emergent properties of the continuous transformation of energy and matter.</p></blockquote><p class="who"><span class="name">Gemma 4 26B A4B</span><span class="maker">open-weight model by Google</span></p></section>
+</div>
+<section class="coda">
+  <p>Each model was asked once, on 18 October 2026, with exactly the prompt above. The answers are unedited and appear in a different order on every visit.</p>
+  <p>Several of them arrived at nearly the same sentence. Make of that what you will.</p>
+  <p><a href="#top" id="again">Back to the question</a></p>
+</section>
+</main>
+<p class="count" aria-hidden="true"></p>
+<script>
+(() => {
+  const wrap = document.getElementById('answers');
+  const items = [...wrap.children];
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  items.forEach(el => wrap.appendChild(el));
+
+  document.getElementById('again').addEventListener('click', e => {
+    e.preventDefault(); window.scrollTo({ top: 0 });
+  });
+
+  const root = document.documentElement;
+  const count = document.querySelector('.count');
+  const sections = [...document.querySelectorAll('section')];
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const i = sections.indexOf(e.target);
+      // Each section gets its own resting place for the light.
+      const a = i * 2.39996;
+      root.style.setProperty('--lx', (50 + Math.cos(a) * 28).toFixed(1) + '%');
+      root.style.setProperty('--ly', (45 + Math.sin(a) * 22).toFixed(1) + '%');
+      const n = items.indexOf(e.target);
+      count.classList.toggle('on', n >= 0);
+      if (n >= 0) count.textContent = `${n + 1} of ${items.length}`;
+    }
+  }, { threshold: 0.55 });
+  sections.forEach(s => io.observe(s));
+
+  addEventListener('keydown', e => {
+    if (!['j', 'k'].includes(e.key)) return;
+    const y = scrollY + innerHeight / 2;
+    const cur = sections.findIndex(s => s.offsetTop <= y && s.offsetTop + s.offsetHeight > y);
+    const next = sections[Math.max(0, Math.min(sections.length - 1, cur + (e.key === 'j' ? 1 : -1)))];
+    next.scrollIntoView();
+  });
+})();
+</script>
+</body>
+</html>
