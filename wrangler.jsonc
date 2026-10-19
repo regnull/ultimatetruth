@@ -1,5 +1,11 @@
 {
   "name": "ultimatetruth",
-  "pages_build_output_dir": "site",
-  "compatibility_date": "2026-10-01"
+  "compatibility_date": "2026-10-01",
+  "account_id": "d3314a0f9a3bd6dc9b2b639af72340f4",
+  "assets": { "directory": "site" },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "ultimatetruth.one", "custom_domain": true },
+    { "pattern": "www.ultimatetruth.one", "custom_domain": true }
+  ]
 }
