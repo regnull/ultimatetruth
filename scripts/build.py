@@ -1,5 +1,5 @@
 """Render site/index.html from site/answers.json."""
-import json, os, html, datetime
+import json, os, html, datetime, re
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "site")
 data = json.load(open(os.path.join(ROOT, "answers.json")))
@@ -7,7 +7,9 @@ tpl = open(os.path.join(os.path.dirname(__file__), "template.html")).read()
 
 
 def para(text):
-    return "".join(f"<p>{html.escape(p.strip())}</p>" for p in text.split("\n\n") if p.strip())
+    def inline(p):
+        return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html.escape(p.strip()))
+    return "".join(f"<p>{inline(p)}</p>" for p in text.split("\n\n") if p.strip())
 
 
 sections = []

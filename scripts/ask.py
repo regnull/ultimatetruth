@@ -2,9 +2,9 @@
 
 Keys are read from the environment: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, XAI_API_KEY,
 OPENROUTER_API_KEY.
-Usage: python3 scripts/ask.py [model-id ...]   (no args = all models; existing answers are kept)
+Usage: python3 scripts/ask.py [model-id ... | all]   (no args = only models without an answer)
 """
-import json, os, sys, datetime, urllib.request
+import json, os, sys, datetime, urllib.request, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 
 QUESTION = (
@@ -42,53 +42,95 @@ OUT = os.path.join(os.path.dirname(__file__), "..", "site", "answers.json")
 
 def post(url, headers, body):
     req = urllib.request.Request(url, json.dumps(body).encode(), {"Content-Type": "application/json", **headers})
-    with urllib.request.urlopen(req, timeout=600) as r:
+    with urllib.request.urlopen(req, timeout=3600) as r:
         return json.load(r)
 
 
-def ask(model, provider):
+def post_sse(url, headers, body):
+    """Stream an Anthropic Messages request and return the concatenated text."""
+    req = urllib.request.Request(url, json.dumps({**body, "stream": True}).encode(),
+                                 {"Content-Type": "application/json", **headers})
+    text = []
+    with urllib.request.urlopen(req, timeout=3600) as r:
+        for line in r:
+            line = line.decode().strip()
+            if not line.startswith("data:"):
+                continue
+            ev = json.loads(line[5:])
+            if ev["type"] == "content_block_delta" and ev["delta"]["type"] == "text_delta":
+                text.append(ev["delta"]["text"])
+            elif ev["type"] == "error":
+                raise RuntimeError(ev["error"])
+    return "".join(text)
+
+
+# Highest reasoning setting first; a 400 falls through to the next one.
+EFFORTS = {
+    "openai": ["xhigh", "high"],
+    "anthropic": ["max"],
+    "google": ["high", None],
+    "xai": ["high", None],
+    "openrouter": ["xhigh", "high"],
+}
+
+
+def ask(model, provider, effort):
     if provider == "openai":
         d = post("https://api.openai.com/v1/responses",
                  {"Authorization": f"Bearer {os.environ['OPENAI_API_KEY']}"},
-                 {"model": model, "input": QUESTION})
+                 {"model": model, "input": QUESTION, "reasoning": {"effort": effort}})
         return "".join(c["text"] for o in d["output"] if o["type"] == "message" for c in o["content"] if c["type"] == "output_text")
     if provider == "anthropic":
-        d = post("https://api.anthropic.com/v1/messages",
-                 {"x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01"},
-                 {"model": model, "max_tokens": 2000, "messages": [{"role": "user", "content": QUESTION}]})
-        return "".join(b["text"] for b in d["content"] if b["type"] == "text")
+        return post_sse("https://api.anthropic.com/v1/messages",
+                        {"x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01"},
+                        {"model": model, "max_tokens": 64000, "thinking": {"type": "adaptive"},
+                         "output_config": {"effort": effort},
+                         "messages": [{"role": "user", "content": QUESTION}]})
     if provider == "google":
+        body = {"contents": [{"role": "user", "parts": [{"text": QUESTION}]}]}
+        if effort:
+            body["generationConfig"] = {"thinkingConfig": {"thinkingLevel": effort}}
         d = post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-                 {"x-goog-api-key": os.environ["GOOGLE_API_KEY"]},
-                 {"contents": [{"role": "user", "parts": [{"text": QUESTION}]}]})
+                 {"x-goog-api-key": os.environ["GOOGLE_API_KEY"]}, body)
         return "".join(p.get("text", "") for p in d["candidates"][0]["content"]["parts"] if not p.get("thought"))
     if provider == "xai":
+        body = {"model": model, "messages": [{"role": "user", "content": QUESTION}]}
+        if effort:
+            body["reasoning_effort"] = effort
         d = post("https://api.x.ai/v1/chat/completions",
-                 {"Authorization": f"Bearer {os.environ['XAI_API_KEY']}"},
-                 {"model": model, "messages": [{"role": "user", "content": QUESTION}]})
+                 {"Authorization": f"Bearer {os.environ['XAI_API_KEY']}"}, body)
         return d["choices"][0]["message"]["content"]
     if provider == "openrouter":
         d = post("https://openrouter.ai/api/v1/chat/completions",
                  {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
-                 {"model": model, "messages": [{"role": "user", "content": QUESTION}]})
+                 {"model": model, "messages": [{"role": "user", "content": QUESTION}],
+                  "reasoning": {"effort": effort}})
         return d["choices"][0]["message"]["content"]
     raise ValueError(provider)
 
 
 def run(m):
     mid, name, maker, provider, open_w = m
-    try:
-        text = ask(mid, provider).strip()
-        print(f"ok   {mid}", file=sys.stderr)
-        return {"id": mid, "name": name, "maker": maker, "open_weights": open_w,
-                "answer": text, "date": datetime.date.today().isoformat()}
-    except Exception as e:
-        body = e.read().decode()[:300] if hasattr(e, "read") else ""
-        print(f"FAIL {mid}: {e} {body}", file=sys.stderr)
+    for effort in EFFORTS[provider]:
+        try:
+            text = ask(mid, provider, effort).strip()
+            print(f"ok   {mid} (effort={effort})", file=sys.stderr)
+            return {"id": mid, "name": name, "maker": maker, "open_weights": open_w, "effort": effort,
+                    "answer": text, "date": datetime.date.today().isoformat()}
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()[:300]
+            print(f"FAIL {mid} (effort={effort}): {e} {body}", file=sys.stderr)
+            if e.code != 400:
+                return
+        except Exception as e:
+            print(f"FAIL {mid} (effort={effort}): {e}", file=sys.stderr)
+            return
 
 
 def main():
     wanted = set(sys.argv[1:])
+    if wanted == {"all"}:
+        wanted = {m[0] for m in MODELS}
     existing = {}
     if os.path.exists(OUT):
         existing = {a["id"]: a for a in json.load(open(OUT))["answers"]}
