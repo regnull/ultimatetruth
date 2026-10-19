@@ -1,6 +1,7 @@
 """Ask each model the question and write answers to site/answers.json.
 
-Keys are read from the environment: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, XAI_API_KEY.
+Keys are read from the environment: OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, XAI_API_KEY,
+OPENROUTER_API_KEY.
 Usage: python3 scripts/ask.py [model-id ...]   (no args = all models; existing answers are kept)
 """
 import json, os, sys, datetime, urllib.request
@@ -27,6 +28,13 @@ MODELS = [
     ("grok-4.7", "Grok 4.7", "xAI", "xai", False),
     ("gemma-4-31b-it", "Gemma 4 31B", "Google", "google", True),
     ("gemma-4-26b-a4b-it", "Gemma 4 26B A4B", "Google", "google", True),
+    ("deepseek/deepseek-v4-pro-0813", "DeepSeek V4 Pro", "DeepSeek", "openrouter", True),
+    ("moonshotai/kimi-k3", "Kimi K3", "Moonshot AI", "openrouter", True),
+    ("qwen/qwen3.8-2.4t-a95b", "Qwen3.8 2.4T", "Alibaba", "openrouter", True),
+    ("z-ai/glm-5.3", "GLM-5.3", "Z.ai", "openrouter", True),
+    ("minimax/minimax-m3", "MiniMax M3", "MiniMax", "openrouter", True),
+    ("nvidia/nemotron-3-ultra-550b-a55b", "Nemotron 3 Ultra", "NVIDIA", "openrouter", True),
+    ("openai/gpt-oss-120b", "gpt-oss-120b", "OpenAI", "openrouter", True),
 ]
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "site", "answers.json")
@@ -57,6 +65,11 @@ def ask(model, provider):
     if provider == "xai":
         d = post("https://api.x.ai/v1/chat/completions",
                  {"Authorization": f"Bearer {os.environ['XAI_API_KEY']}"},
+                 {"model": model, "messages": [{"role": "user", "content": QUESTION}]})
+        return d["choices"][0]["message"]["content"]
+    if provider == "openrouter":
+        d = post("https://openrouter.ai/api/v1/chat/completions",
+                 {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
                  {"model": model, "messages": [{"role": "user", "content": QUESTION}]})
         return d["choices"][0]["message"]["content"]
     raise ValueError(provider)
